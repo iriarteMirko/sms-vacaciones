@@ -1,6 +1,0 @@
-customtkinter
-pandas
-openpyxl
-pillow
-timedelta
-PyInstaller
