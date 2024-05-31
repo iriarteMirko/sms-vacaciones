@@ -1,10 +1,10 @@
-from datetime import datetime
 import pandas as pd
 import os
 
 
 class SMS_APOYO():
-    def __init__(self, ruta_dacx, ruta_celulares, ruta_apoyos, ruta_vacaciones, apoyos_txt):
+    def __init__(self, fecha_hoy, ruta_dacx, ruta_celulares, ruta_apoyos, ruta_vacaciones, apoyos_txt):
+        self.fecha_hoy = fecha_hoy
         self.ruta_dacx = ruta_dacx
         self.ruta_celulares = ruta_celulares
         self.ruta_apoyos = ruta_apoyos
@@ -76,6 +76,10 @@ class SMS_APOYO():
         self.texto3 = df_regla['TEXTO'][2]
         self.texto4 = df_regla['TEXTO'][3]
     
+    def formato_fecha(self, fecha):
+        from datetime import datetime
+        return datetime.strptime(fecha, '%d.%m.%Y')
+    
     def generar_sms(self,):
         df_vacaciones = pd.read_excel(self.ruta_vacaciones, sheet_name='VACACIONES')
         df_vacaciones.dropna(inplace=True)
@@ -83,11 +87,9 @@ class SMS_APOYO():
         dict_analistas = dict(zip(df_vacaciones['ANALISTA'], zip(df_vacaciones['FECHA_SALIDA'], df_vacaciones['FECHA_RETORNO'])))
         
         vacaciones = {}
-        fecha_hoy = datetime.now().strftime('%d.%m.%Y')
-        fecha_hoy = datetime.strptime(fecha_hoy, '%d.%m.%Y')
         
         for analista, fechas in dict_analistas.items():
-            if datetime.strptime(fechas[0], '%d.%m.%Y') <= fecha_hoy <= datetime.strptime(fechas[1], '%d.%m.%Y'):
+            if self.formato_fecha(fechas[0]) <= self.formato_fecha(self.fecha_hoy) <= self.formato_fecha(fechas[1]):
                 print(f'{analista} de vacaciones desde {fechas[0]} hasta {fechas[1]}')
                 vacaciones.update({analista: fechas[1]})
         
@@ -114,4 +116,5 @@ class SMS_APOYO():
         with open(self.apoyos_txt, "w") as f:
             for item in self.lista_apoyos:
                 f.write("%s\n" % item)
+        print(f'Registros validados: [{len(self.lista_apoyos)}]')
         os.startfile(self.apoyos_txt)
