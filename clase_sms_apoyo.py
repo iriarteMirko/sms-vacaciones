@@ -1,14 +1,13 @@
+from datetime import datetime
 import pandas as pd
 import os
 
 
 class SMS_APOYO():
-    def __init__(self, fecha_hoy, ruta_dacx, ruta_celulares, ruta_apoyos, ruta_regla, ruta_vacaciones, apoyos_txt):
-        self.fecha_hoy = fecha_hoy
+    def __init__(self, ruta_dacx, ruta_celulares, ruta_apoyos, ruta_vacaciones, apoyos_txt):
         self.ruta_dacx = ruta_dacx
         self.ruta_celulares = ruta_celulares
         self.ruta_apoyos = ruta_apoyos
-        self.ruta_regla = ruta_regla
         self.ruta_vacaciones = ruta_vacaciones
         self.apoyos_txt = apoyos_txt
     
@@ -71,21 +70,24 @@ class SMS_APOYO():
         self.df_cruce = df_cruce
     
     def obtener_regla(self,):
-        df_regla = pd.read_excel(self.ruta_regla, sheet_name='TEXTO')
+        df_regla = pd.read_excel(self.ruta_vacaciones, sheet_name='TEXTO')
         self.texto1 = df_regla['TEXTO'][0]
         self.texto2 = df_regla['TEXTO'][1]
         self.texto3 = df_regla['TEXTO'][2]
         self.texto4 = df_regla['TEXTO'][3]
     
     def generar_sms(self,):
-        df_vacaciones = pd.read_excel(self.ruta_vacaciones)
+        df_vacaciones = pd.read_excel(self.ruta_vacaciones, sheet_name='VACACIONES')
         df_vacaciones.dropna(inplace=True)
         
         dict_analistas = dict(zip(df_vacaciones['ANALISTA'], zip(df_vacaciones['FECHA_SALIDA'], df_vacaciones['FECHA_RETORNO'])))
         
         vacaciones = {}
+        fecha_hoy = datetime.now().strftime('%d.%m.%Y')
+        fecha_hoy = datetime.strptime(fecha_hoy, '%d.%m.%Y')
+        
         for analista, fechas in dict_analistas.items():
-            if fechas[0] <= self.fecha_hoy <= fechas[1]:
+            if datetime.strptime(fechas[0], '%d.%m.%Y') <= fecha_hoy <= datetime.strptime(fechas[1], '%d.%m.%Y'):
                 print(f'{analista} de vacaciones desde {fechas[0]} hasta {fechas[1]}')
                 vacaciones.update({analista: fechas[1]})
         
