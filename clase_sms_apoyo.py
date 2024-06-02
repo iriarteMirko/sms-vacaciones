@@ -18,8 +18,7 @@ class SMS_APOYO():
         
         df_dacx = pd.read_excel(self.ruta_dacx, sheet_name='Base_NUEVA', usecols=columnas)
         df_dacx = df_dacx.rename(columns={'ANALISTA_ACT': 'ANALISTA', 'TIPO_DAC': 'TIPO'})
-        df_dacx = df_dacx[~df_dacx['ANALISTA'].isin(no_analistas)]
-        df_dacx = df_dacx[~df_dacx['ESTADO'].isin(no_estados)]
+        df_dacx = df_dacx[~df_dacx['ANALISTA'].isin(no_analistas) & ~df_dacx['ESTADO'].isin(no_estados)]
         df_dacx['DEUDOR'] = df_dacx['DEUDOR'].astype('Int64').astype(str)
         df_dacx['RUC'] = df_dacx['RUC'].astype('Int64').astype(str)
         df_dacx.dropna(subset=['DEUDOR'], inplace=True)
@@ -64,17 +63,16 @@ class SMS_APOYO():
         df_apoyos = pd.read_excel(self.ruta_apoyos, sheet_name='GENERAL', usecols=['DEUDOR', 'ANALISTA', 'APOYO1', 'APOYO2', 'APOYO3'])
         df_apoyos['DEUDOR'] = df_apoyos['DEUDOR'].astype('Int64').astype(str)
         df_cruce = pd.merge(self.df_celulares, df_apoyos, on='DEUDOR', how='left')
-        df_cruce.dropna(subset=['ANALISTA'], inplace=True)
-        df_cruce.dropna(subset=['CELULAR'], inplace=True)
+        df_cruce.dropna(subset=['ANALISTA','CELULAR'], inplace=True)
         df_cruce.reset_index(drop=True, inplace=True)
         self.df_cruce = df_cruce
     
-    def obtener_regla(self,):
-        df_regla = pd.read_excel(self.ruta_vacaciones, sheet_name='TEXTO')
-        self.texto1 = df_regla['TEXTO'][0]
-        self.texto2 = df_regla['TEXTO'][1]
-        self.texto3 = df_regla['TEXTO'][2]
-        self.texto4 = df_regla['TEXTO'][3]
+    def obtener_texto(self,):
+        df_texto = pd.read_excel(self.ruta_vacaciones, sheet_name='TEXTO')
+        self.texto1 = df_texto['TEXTO'][0]
+        self.texto2 = df_texto['TEXTO'][1]
+        self.texto3 = df_texto['TEXTO'][2]
+        self.texto4 = df_texto['TEXTO'][3]
     
     def formato_fecha(self, fecha):
         from datetime import datetime
